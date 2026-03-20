@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { RefreshCw } from "lucide-react";
 import {
@@ -10,19 +10,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { StockData } from "../types";
+import { ComparisonModalProps } from "../types";
 
 export const ComparisonModal = ({
   isOpen,
   onClose,
   metric,
   stocks,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  metric: "pe" | "margin" | "growth" | null;
-  stocks: StockData[];
-}) => {
+}: ComparisonModalProps) => {
   const data = useMemo(() => {
     if (!metric) return [];
     return stocks

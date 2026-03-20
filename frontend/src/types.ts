@@ -43,6 +43,15 @@ export interface StockData {
   zone: string;
 }
 
+export type ComparisonMetric = "pe" | "margin" | "growth";
+
+export interface ComparisonModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  metric: ComparisonMetric | null;
+  stocks: StockData[];
+}
+
 export interface ReportData {
   ticker: string;
   date: string;
