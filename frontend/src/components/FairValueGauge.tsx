@@ -1,27 +1,52 @@
 import { motion } from "motion/react";
-import { Target } from "lucide-react";
+import { Target, Calculator } from "lucide-react";
 import { formatCurrency, cn } from "../utils";
+import { ValuationMethod } from "../types";
+
+interface FairValueGaugeProps {
+  current: number;
+  low: number;
+  mid: number;
+  high: number;
+  methods: ValuationMethod[];
+  dcfValue: number | null;
+  peValue: number | null;
+  upsidePct: number | null;
+  wacc: number | null;
+  buyPrice: number | null;
+  marginOfSafety: number | null;
+}
 
 export const FairValueGauge = ({
   current,
   low,
   mid,
   high,
-}: {
-  current: number;
-  low: number;
-  mid: number;
-  high: number;
-}) => {
+  methods,
+  dcfValue,
+  peValue,
+  upsidePct,
+  wacc,
+  buyPrice,
+  marginOfSafety,
+}: FairValueGaugeProps) => {
   const isValid =
     typeof current === "number" &&
     typeof low === "number" &&
     typeof mid === "number" &&
     typeof high === "number" &&
     high > low;
-  const percentage = isValid
-    ? Math.min(Math.max(((current - low) / (high - low)) * 100, 0), 100)
-    : 0;
+
+  // Extend range to show price beyond bounds
+  const rangeMin = isValid ? Math.min(low * 0.8, current * 0.9) : 0;
+  const rangeMax = isValid ? Math.max(high * 1.2, current * 1.1) : 100;
+  const toPercent = (val: number) =>
+    isValid
+      ? Math.min(
+          Math.max(((val - rangeMin) / (rangeMax - rangeMin)) * 100, 0),
+          100,
+        )
+      : 0;
 
   let zoneColor = "bg-zinc-700";
   let zoneLabel = "Unknown";
@@ -63,11 +88,39 @@ export const FairValueGauge = ({
         </span>
       </div>
 
+      {/* Gauge bar with zone coloring */}
       <div className="relative h-4 bg-zinc-800 rounded-full overflow-hidden mb-2">
-        <div className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 opacity-20 w-full" />
+        {/* Green zone: 0 to low */}
+        <div
+          className="absolute top-0 bottom-0 bg-emerald-500/20"
+          style={{ left: "0%", width: `${toPercent(low)}%` }}
+        />
+        {/* Light green zone: low to mid */}
+        <div
+          className="absolute top-0 bottom-0 bg-emerald-400/15"
+          style={{
+            left: `${toPercent(low)}%`,
+            width: `${toPercent(mid) - toPercent(low)}%`,
+          }}
+        />
+        {/* Amber zone: mid to high */}
+        <div
+          className="absolute top-0 bottom-0 bg-amber-400/15"
+          style={{
+            left: `${toPercent(mid)}%`,
+            width: `${toPercent(high) - toPercent(mid)}%`,
+          }}
+        />
+        {/* Red zone: high+ */}
+        <div
+          className="absolute top-0 bottom-0 bg-rose-500/15"
+          style={{ left: `${toPercent(high)}%`, right: "0%" }}
+        />
+
+        {/* Price indicator */}
         <motion.div
-          initial={{ left: 0 }}
-          animate={{ left: `${percentage}%` }}
+          initial={{ left: "0%" }}
+          animate={{ left: `${toPercent(current)}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
           className="absolute top-0 bottom-0 w-1 bg-white z-10 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
         />
@@ -79,24 +132,121 @@ export const FairValueGauge = ({
         <span>High: {isValid ? formatCurrency(high) : "-"}</span>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      {/* Price / Fair Value / Upside grid */}
+      <div className="mt-6 grid grid-cols-3 gap-3">
         <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800">
           <p className="text-[10px] text-zinc-600 uppercase font-bold">
-            Current Price
+            Current
           </p>
-          <p className="text-xl font-bold text-white">
+          <p className="text-lg font-bold text-white">
             {isValid ? formatCurrency(current) : "-"}
           </p>
         </div>
         <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800">
           <p className="text-[10px] text-zinc-600 uppercase font-bold">
-            Fair Value (Mid)
+            Fair Value
           </p>
-          <p className="text-xl font-bold text-white">
+          <p className="text-lg font-bold text-white">
             {isValid ? formatCurrency(mid) : "-"}
           </p>
         </div>
+        <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800">
+          <p className="text-[10px] text-zinc-600 uppercase font-bold">
+            Upside
+          </p>
+          <p
+            className={cn(
+              "text-lg font-bold",
+              upsidePct !== null && upsidePct > 0
+                ? "text-emerald-400"
+                : "text-rose-400",
+            )}
+          >
+            {upsidePct !== null
+              ? `${upsidePct > 0 ? "+" : ""}${upsidePct}%`
+              : "-"}
+          </p>
+        </div>
       </div>
+
+      {/* Valuation methods breakdown */}
+      {methods && methods.length > 0 && (
+        <div className="mt-5 pt-4 border-t border-zinc-800">
+          <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mb-3 flex items-center">
+            <Calculator className="w-3 h-3 mr-1" />
+            Valuation Models
+          </p>
+          <div className="space-y-2">
+            {methods.map((m, i) => (
+              <div key={i} className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-zinc-400">{m.name}</span>
+                  <span className="text-[10px] text-zinc-600">
+                    ({m.weight}%)
+                  </span>
+                </div>
+                <span className="text-sm font-mono font-bold text-white">
+                  {formatCurrency(m.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+          {/* Individual model values + WACC */}
+          {(peValue || dcfValue || wacc) && (
+            <div className="mt-3 pt-3 border-t border-zinc-800/50 grid grid-cols-3 gap-3">
+              {peValue && (
+                <div>
+                  <p className="text-[10px] text-zinc-600 uppercase">
+                    PE Model
+                  </p>
+                  <p className="text-sm font-mono text-zinc-300">
+                    {formatCurrency(peValue)}
+                  </p>
+                </div>
+              )}
+              {dcfValue && (
+                <div>
+                  <p className="text-[10px] text-zinc-600 uppercase">
+                    DCF Intrinsic
+                  </p>
+                  <p className="text-sm font-mono text-zinc-300">
+                    {formatCurrency(dcfValue)}
+                  </p>
+                </div>
+              )}
+              {wacc !== null && (
+                <div>
+                  <p className="text-[10px] text-zinc-600 uppercase">
+                    WACC (CAPM)
+                  </p>
+                  <p className="text-sm font-mono text-zinc-300">
+                    {wacc.toFixed(1)}%
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          {/* Margin of Safety buy price */}
+          {buyPrice && marginOfSafety !== null && (
+            <div className="mt-3 pt-3 border-t border-zinc-800/50 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-400">Buy Price</span>
+                <span className="text-[10px] text-zinc-600">
+                  (MoS {marginOfSafety}%)
+                </span>
+              </div>
+              <span
+                className={cn(
+                  "text-sm font-mono font-bold",
+                  current <= buyPrice ? "text-emerald-400" : "text-zinc-300",
+                )}
+              >
+                {formatCurrency(buyPrice)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };

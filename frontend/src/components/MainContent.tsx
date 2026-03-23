@@ -50,6 +50,13 @@ export function MainContent({
                 low={stock.my_fair_low}
                 mid={stock.my_fair_mid}
                 high={stock.my_fair_high}
+                methods={stock.valuation_methods || []}
+                dcfValue={stock.dcf_fair_value}
+                peValue={stock.pe_fair_value}
+                upsidePct={stock.upside_pct}
+                wacc={stock.wacc}
+                buyPrice={stock.buy_price}
+                marginOfSafety={stock.margin_of_safety}
               />
               <EfficiencyMetrics stock={stock} />
             </div>

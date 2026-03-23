@@ -9,9 +9,21 @@ export interface QuarterlyData {
   opMargin: number;
 }
 
+export interface QuarterlyEps {
+  date: string;
+  eps: number;
+}
+
+export interface ValuationMethod {
+  name: string;
+  value: number;
+  weight: number;
+}
+
 export interface StockData {
   ticker: string;
   name: string;
+  sector: string;
   price: number;
   market_cap: number;
   ttm_pe: number | null;
@@ -34,13 +46,34 @@ export interface StockData {
   fcf_per_share: number | null;
   fcf_yield: number | null;
   quarterly_revenue: QuarterlyData[];
-  quarterly_eps: QuarterlyData[];
+  quarterly_eps: QuarterlyEps[];
+
+  // Multi-model valuation
+  pe_fair_value: number | null;
+  dcf_fair_value: number | null;
+  valuation_methods: ValuationMethod[];
+
+  // Composite analysis
   my_fair_low: number;
   my_fair_mid: number;
   my_fair_high: number;
+  upside_pct: number | null;
   grade: string;
+  grade_score: number;
   signal: string;
   zone: string;
+  risk_flags: string[];
+
+  // v3 fields
+  wacc: number | null;
+  piotroski_score: number | null;
+  piotroski_details: string[];
+  margin_of_safety: number | null;
+  buy_price: number | null;
+  peer_rank: Record<
+    string,
+    { rank: number; total: number; percentile: number }
+  >;
 }
 
 export type ComparisonMetric = "pe" | "margin" | "growth";
@@ -50,20 +83,4 @@ export interface ComparisonModalProps {
   onClose: () => void;
   metric: ComparisonMetric | null;
   stocks: StockData[];
-}
-
-export interface ReportData {
-  ticker: string;
-  date: string;
-  analysis: {
-    sentiment: string;
-    score: number;
-    summary?: string;
-    chart_data: { time: string; value: number }[];
-    metrics: {
-      pe_ratio: number;
-      risk_level: string;
-      growth_rate: number;
-    };
-  };
 }
