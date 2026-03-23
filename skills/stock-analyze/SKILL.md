@@ -10,7 +10,7 @@ metadata: {"openclaw":{"always":true,"os":["darwin","linux","win32"]}}
 This skill reads pre-generated JSON reports from the quantitative analysis system and answers questions about stock valuations in natural language.
 
 Reports are located at:
-  /home/ian/Desktop/Ian/stock-tracker/analytics/reports/<TICKER>/<YYYYMMDD>.json
+  ~/Desktop/Ian/stock-tracker/analytics/reports/<TICKER>/<YYYYMMDD>.json
 
 Always use the latest dated file available for each ticker.
 

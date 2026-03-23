@@ -13,7 +13,7 @@ This skill runs the quantitative analysis script to pull fresh data from Yahoo F
 
 Run the following command:
 
-  cd /home/ian/Desktop/Ian/stock-tracker/analytics && python3 analyzer.py
+  cd ~/Desktop/Ian/stock-tracker/analytics && python3 analyzer.py
 
 The script will:
 1. Fetch data for all 21 tickers in the watchlist

@@ -10,10 +10,10 @@ metadata: {"openclaw":{"always":true,"os":["darwin","linux","win32"]}}
 This skill reads daily news JSON files collected by news_fetcher.py and produces a deep research style digest. It also cross-references the quantitative reports to link news events to valuation impact.
 
 News files are located at:
-  /home/ian/Desktop/Ian/stock-tracker/analytics/news/digest/<YYYYMMDD>.json
+  ~/Desktop/Ian/stock-tracker/analytics/news/digest/<YYYYMMDD>.json
 
 Quantitative reports are at:
-  /home/ian/Desktop/Ian/stock-tracker/analytics/reports/<TICKER>/<YYYYMMDD>.json
+  ~/Desktop/Ian/stock-tracker/analytics/reports/<TICKER>/<YYYYMMDD>.json
 
 Each article has these fields:
   - ticker: which stock this news is related to
