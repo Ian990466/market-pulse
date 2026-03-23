@@ -1,13 +1,13 @@
 ---
 name: stock-fetch
-description: Fetch latest stock data for Ian's watchlist via yfinance — runs v2 multi-model analysis
+description: Fetch latest stock data for watchlist via yfinance — runs multi-model analysis
 user-invocable: true
 metadata: {"openclaw":{"requires":{"bins":["python3"]},"os":["darwin","linux"]}}
 ---
 
 ## Overview
 
-This skill runs Ian's quantitative analysis script (v2) to pull fresh data from Yahoo Finance (yfinance) and update all JSON reports.
+This skill runs the quantitative analysis script to pull fresh data from Yahoo Finance (yfinance) and update all JSON reports.
 
 ## How to fetch
 

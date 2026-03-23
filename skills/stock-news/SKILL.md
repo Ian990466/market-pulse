@@ -1,6 +1,6 @@
 ---
 name: stock-news
-description: Deep research news digest for Ian's stock watchlist — cross-ticker theme analysis, sentiment, and key signals
+description: Deep research news digest for stock watchlist — cross-ticker theme analysis, sentiment, and key signals
 user-invocable: true
 metadata: {"openclaw":{"always":true,"os":["darwin","linux","win32"]}}
 ---

@@ -1,32 +1,3 @@
-"""
-=============================================================
-Ian's Automated Quantitative Analysis System  v3.0
-=============================================================
-Daily automated stock data fetch -> quantitative metrics -> buy zone report
-
-Valuation methodology:
-  1. PE-based model   (sector PE × implied EPS)
-  2. DCF model        (10-yr FCF projection, CAPM-based WACC per stock)
-  3. Speculative      (52-week range percentile for pre-earnings stocks)
-  Fair value = weighted average of available models
-
-v3.0 upgrades:
-  - CAPM-based WACC (per-stock discount rate using beta)
-  - Fixed ROIC (uses EBIT, not EBITDA)
-  - DCF terminal value cap (max 75% of total)
-  - Piotroski F-Score (9-factor financial health 0-9)
-  - Margin of Safety (15-25% discount on fair value)
-  - Peer percentile ranking within sector
-
-Grading: sector-adjusted, 6-factor weighted scoring (A+ to D)
-
-Data Source: yfinance (Yahoo Finance) -- free, unlimited, no API key required
-
-Install dependencies:
-  pip install yfinance schedule
-=============================================================
-"""
-
 import json
 import math
 import os
@@ -137,8 +108,6 @@ class StockData:
 # ==================== QUANTITATIVE ENGINE ====================
 
 class QuantEngine:
-    """Core quantitative analysis logic — v3 with CAPM, F-Score, MoS, Peer Ranking"""
-
     PE_RANGES = {
         "mega_tech":     {"low": 20, "mid": 28, "high": 35},
         "high_growth":   {"low": 25, "mid": 35, "high": 50},
@@ -180,11 +149,6 @@ class QuantEngine:
     # ---- CAPM-based WACC ----
     @classmethod
     def calculate_wacc(cls, stock: StockData, info: dict) -> float:
-        """
-        CAPM: Cost of Equity = Risk-Free Rate + Beta × Equity Risk Premium
-        WACC simplified as Cost of Equity (most of these stocks are low-debt tech).
-        For levered companies, blend with cost of debt.
-        """
         beta = stock.beta if stock.beta and stock.beta > 0 else 1.0
         cost_of_equity = RISK_FREE_RATE + beta * EQUITY_RISK_PREMIUM
 
@@ -217,11 +181,6 @@ class QuantEngine:
     # ---- ROIC calculation (FIXED: uses operating income, not EBITDA) ----
     @classmethod
     def calculate_roic(cls, stock: StockData, info: dict, income_stmt=None) -> StockData:
-        """
-        ROIC = NOPAT / Invested Capital
-        NOPAT = EBIT × (1 - tax_rate)  [NOT EBITDA]
-        Invested Capital = Total Debt + Total Equity - Cash
-        """
         try:
             # Try to get EBIT from income statement first (most accurate)
             ebit = None
@@ -265,10 +224,6 @@ class QuantEngine:
     # ---- DCF Model (v3: CAPM WACC + terminal value cap) ----
     @classmethod
     def calculate_dcf(cls, stock: StockData, info: dict, wacc: float) -> Optional[float]:
-        """
-        DCF with per-stock WACC and terminal value sanity check.
-        Terminal value capped at DCF_TERMINAL_VALUE_CAP of total.
-        """
         fcf = info.get("freeCashflow")
         shares = info.get("sharesOutstanding")
 
@@ -314,10 +269,6 @@ class QuantEngine:
     # ---- Piotroski F-Score ----
     @classmethod
     def calculate_piotroski(cls, stock: StockData, info: dict, income_stmt=None, balance_sheet=None, cashflow_stmt=None) -> StockData:
-        """
-        Piotroski F-Score: 9 binary signals (0 or 1 each, total 0-9)
-        Categories: Profitability (4), Leverage/Liquidity (3), Operating Efficiency (2)
-        """
         score = 0
         details = []
 
@@ -467,11 +418,6 @@ class QuantEngine:
     # ---- Margin of Safety ----
     @classmethod
     def calculate_margin_of_safety(cls, stock: StockData) -> StockData:
-        """
-        Apply margin of safety to fair value to get recommended buy price.
-        Speculative stocks get higher MoS (30%), others get 20%.
-        High F-Score (7+) reduces MoS by 5% (more confidence in financials).
-        """
         sector = cls.get_sector(stock.ticker)
         if sector == "speculative":
             mos = MARGIN_OF_SAFETY_SPECULATIVE

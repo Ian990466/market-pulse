@@ -1,20 +1,3 @@
-"""
-=============================================================
-Ian's Stock News Fetcher
-=============================================================
-Fetches news for all watchlist tickers via yfinance,
-attempts to extract full article text using trafilatura,
-and saves structured JSON for downstream AI analysis.
-
-Install dependencies:
-  pip install yfinance trafilatura
-
-Output:
-  news/<TICKER>/<YYYYMMDD>.json   — per-ticker articles
-  news/digest/<YYYYMMDD>.json     — combined daily digest (all tickers)
-=============================================================
-"""
-
 import json
 import os
 import time
@@ -42,10 +25,6 @@ os.makedirs(os.path.join(NEWS_DIR, "digest"), exist_ok=True)
 # ==================== FULL TEXT EXTRACTION ====================
 
 def fetch_full_text(url: str) -> Optional[str]:
-    """
-    Attempt to extract full article text from a URL using trafilatura.
-    Returns None if extraction fails (paywall, JS-only, timeout, etc).
-    """
     try:
         import trafilatura
         downloaded = trafilatura.fetch_url(url, no_ssl=False, timeout=REQUEST_TIMEOUT)
@@ -65,10 +44,6 @@ def fetch_full_text(url: str) -> Optional[str]:
 # ==================== NEWS FETCH ====================
 
 def fetch_ticker_news(ticker: str) -> list[dict]:
-    """
-    Fetch news for a single ticker via yfinance,
-    then attempt to pull full article text for each item.
-    """
     import yfinance as yf
 
     try:
@@ -126,7 +101,6 @@ def fetch_ticker_news(ticker: str) -> list[dict]:
 # ==================== DEDUPLICATION ====================
 
 def deduplicate(all_articles: list[dict]) -> list[dict]:
-    """Remove duplicate articles that appear across multiple tickers."""
     seen = set()
     unique = []
     for a in all_articles:
@@ -140,7 +114,7 @@ def deduplicate(all_articles: list[dict]) -> list[dict]:
 
 def main():
     print("=" * 60)
-    print("Ian Stock News Fetcher")
+    print("Stock News Fetcher")
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     print(f"{len(WATCHLIST)} tickers")
     print("=" * 60)

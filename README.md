@@ -88,3 +88,48 @@ Yahoo Finance → analyzer.py → reports/*.json → Express API → React Dashb
                                     ↑
               news_fetcher.py → news/*.json → Claude Skills → Digest
 ```
+
+## Analyzer Methodology (v3)
+
+Data source: yfinance (Yahoo Finance) — no API key required.
+
+**Valuation models** (weighted composite):
+
+| Model | Used when | Weight |
+|-------|-----------|--------|
+| PE-based | Forward PE available | 60% |
+| DCF (10-yr FCF) | Free cash flow available | 40% (70% if PE unavailable) |
+| 52W Percentile | Speculative / no PE | 100% |
+
+**CAPM-based WACC** — per-stock discount rate:
+- `Cost of Equity = Risk-Free Rate (4.3%) + Beta × ERP (5.5%)`
+- Blended with after-tax cost of debt for levered companies
+- Clamped to [7%, 18%]
+
+**DCF assumptions:**
+- 10-year projection, growth decays 15%/yr toward 3% terminal rate
+- Terminal value capped at 75% of total DCF value
+
+**Piotroski F-Score** — 9-factor financial health (0–9):
+- Profitability (4): net income, ROA, operating CF, accrual quality
+- Leverage/Liquidity (3): D/E ratio, current ratio, dilution
+- Efficiency (2): gross margin, asset turnover
+
+**Margin of Safety** applied to fair value → recommended buy price:
+- Normal: 20% | Speculative: 30%
+- F-Score ≥ 7 reduces by 5%; F-Score ≤ 3 adds 10%
+
+**Grading** — sector-adjusted, 6-factor weighted score → A+ to D:
+PEG, gross margin, revenue growth, forward PE, upside %, Piotroski score
+
+## News Fetcher
+
+Fetches news for all watchlist tickers via yfinance, attempts full article extraction with trafilatura, and saves structured JSON for downstream analysis.
+
+**Output:**
+- `news/<TICKER>/<YYYYMMDD>.json` — per-ticker articles
+- `news/digest/<YYYYMMDD>.json` — combined daily digest (cross-ticker, deduplicated)
+
+**Article fields:** ticker, title, url, provider, published_at, summary, full_text, has_full_text
+
+Full text extraction uses trafilatura; falls back gracefully on paywalled or JS-rendered pages.

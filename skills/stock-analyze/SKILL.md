@@ -1,13 +1,13 @@
 ---
 name: stock-analyze
-description: Query Ian's stock watchlist — multi-model valuation, grade, risk flags, and detailed analysis
+description: Query stock watchlist — multi-model valuation, grade, risk flags, and detailed analysis
 user-invocable: true
 metadata: {"openclaw":{"always":true,"os":["darwin","linux","win32"]}}
 ---
 
 ## Overview
 
-This skill reads pre-generated JSON reports from Ian's quantitative analysis system (v2) and answers questions about stock valuations in natural language.
+This skill reads pre-generated JSON reports from the quantitative analysis system and answers questions about stock valuations in natural language.
 
 Reports are located at:
   /home/ian/Desktop/Ian/stock-tracker/analytics/reports/<TICKER>/<YYYYMMDD>.json
